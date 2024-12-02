@@ -1,10 +1,15 @@
+
+
+
 import 'package:flutter/material.dart';
-import 'package:quizzler/providers/question.dart';
 import 'package:quizzler/providers/quizBrain.dart';
+import 'package:quizzler/widgets/alertWidget.dart';
 
 QuizBrain quizBrain = QuizBrain();
 
 void main() => runApp(Quizzler());
+
+
 
 class Quizzler extends StatelessWidget
 {
@@ -28,18 +33,42 @@ class Quizzler extends StatelessWidget
 }
 
 
+
 class QuizPage extends StatefulWidget
 {
   @override
   _QuizPageState createState() => _QuizPageState();
 }
 
+
+
 class _QuizPageState extends State<QuizPage>
 {
   List<Widget> scoreKeeper = [];
 
+  Future<void> checkAnswer(bool userAnswer, BuildContext context) async
+  {
+    setState(()
+    {
+      bool correctAnswer = quizBrain.getQuestionAnswer();
 
+      if (userAnswer == correctAnswer)
+      {
+        scoreKeeper.add(Icon(Icons.check, color: Colors.green));
+      } else {
+        scoreKeeper.add(Icon(Icons.close, color: Colors.red));
+      }
+    });
 
+    bool nextQuestionAvailable = quizBrain.nextQuestion();
+
+    if (nextQuestionAvailable)
+    {
+      await messageFinish(context);
+      quizBrain.resetApp();
+      scoreKeeper.clear();
+    }
+  }
 
 
   @override
@@ -80,27 +109,7 @@ class _QuizPageState extends State<QuizPage>
               ),
               onPressed: ()
               {
-                bool correctAnswer = quizBrain.getQuestionAnswer();
-                quizBrain.nextQuestion();
-                if(correctAnswer ==  true )
-                {
-
-                }
-                else
-                {
-
-                }
-                setState(()
-                {
-
-                  scoreKeeper.add(
-                    Icon(
-                      Icons.check,
-                      color: Colors.green,
-                    )
-
-                  );
-                });
+                checkAnswer(true,context);
               },
             ),
           ),
@@ -119,36 +128,14 @@ class _QuizPageState extends State<QuizPage>
                 ),
               ),
               onPressed: () {
-                bool correctAnswer = quizBrain.getQuestionAnswer();
+                checkAnswer(false,context);
 
-                if(correctAnswer ==  true )
-                {
-
-                }
-                else
-                {
-
-                }
-                //The user picked true.
-                setState(() {
-
-                  quizBrain.nextQuestion();
-                  scoreKeeper.add(
-                      Icon(
-                        Icons.check,
-                        color: Colors.green,
-                      )
-
-                  );
-                });
               },
             ),
           ),
         ),
-        //TODO: Add a Row here as your score keeper
-        Row(
-          children: scoreKeeper,
-        )
+
+        Row(children: scoreKeeper,)
       ],
     );
   }
